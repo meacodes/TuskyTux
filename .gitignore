@@ -169,3 +169,30 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+#Compiled binary files
+*.o
+*.so
+*.out
+*.a
+*.dylib
+*.bin
+*.exe
+*.dll
+
+#Built executable files
+build/
+dist/
+*.app
+*.run
+*.deb
+*.rpm
+
+#Editor-related settings and caches
+.vscode/
+*.swp
+*~
+
+#Mount-related files (precautionary, if needed)
+mnt/
+media/
