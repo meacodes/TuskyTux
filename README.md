@@ -1,5 +1,5 @@
 # TuskyTux
-TuskyDrive-Linux – A simple and secure Linux application to mount and manage Tusky decentralized storage as a local drive.
+TuskyTux – A simple and secure Linux application to mount and manage Tusky decentralized storage as a local drive.
 
 ## Features  
 - Mount Tusky storage as a virtual drive  
