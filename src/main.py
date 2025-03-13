@@ -1,10 +1,12 @@
 import sys
-from utils import show_logo
+from utils import show_logo, show_intro
 
 def main():
-    """Main function to start the program."""
-    show_logo()
-    print("Welcome to TuskyTux!")
+    show_logo()  # Display ASCII logo
+    show_intro()  # Display introduction
+
+    # Next step: Get API Key (to be implemented)
+    # get_api_key()
 
 if __name__ == "__main__":
     main()

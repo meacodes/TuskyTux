@@ -23,3 +23,23 @@ def show_logo():
         subprocess.run(["ascii-image-converter", "-C", "-d", f"{width},{height}", logo_path])
     except Exception as e:
         print(f"Error displaying logo: {e}")
+def show_intro():
+    """Display an introduction message about TuskyTux."""
+    print("\n🚀 Welcome to TuskyTux - Your Decentralized Storage Companion! 🚀\n")
+    
+    print("TuskyTux is a Linux-based open-source tool that allows you to mount your "
+          "Tusky decentralized storage as a drive on your system.")
+    
+    print("\n🔗 Don't have an API Key yet? Register here: https://app.tusky.io/account/api-keys\n")
+    
+    print("📌 Features & Commands Overview:")
+    print("  - `help`: Show available commands and usage.")
+    print("  - `mount`: Mount your Tusky storage as a drive.")
+    print("  - `unmount`: Unmount the drive.")
+    print("  - `status`: Check mount status.")
+    print("  - `config`: Manage API Key and settings.\n")
+    
+    print("💡 Run `help` to see all available commands!\n")
+    
+    print("❤️ Dedicated to Linux & Open-Source Enthusiasts! ❤️")
+    print("🌐 Visit: \033[4;34mhttps://meacodes.com\033[0m\n")
