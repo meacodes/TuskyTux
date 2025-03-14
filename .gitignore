@@ -182,3 +182,4 @@ dist/
 
 # Ignore possible Tusky-related cache files
 .tuskytux_cache/
+.json
