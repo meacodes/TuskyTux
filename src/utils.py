@@ -89,7 +89,11 @@ def list_api_keys(config):
 def add_api_key(config):
     """Add a new API Key."""
     while True:
-        api_key = input("\nEnter new API Key: ").strip()
+        api_key = input("\nEnter new API Key (or type 'cancel' to go back): ").strip()
+        if api_key.lower() == "cancel":
+            print("❌ Operation canceled. Returning to the previous menu.")
+            return
+
         if not api_key:
             print("⚠️ API Key cannot be empty.")
             continue
@@ -118,18 +122,23 @@ def remove_api_key(config):
         return
 
     list_api_keys(config)
-    api_key = input("\nEnter API Key to remove: ").strip()
+    while True:
+        api_key = input("\nEnter API Key to remove (or type 'cancel' to go back): ").strip()
+        if api_key.lower() == "cancel":
+            print("❌ Operation canceled. Returning to the previous menu.")
+            return
 
-    if api_key in config["api_keys"]:
-        del config["api_keys"][api_key]
-        if config["active_api"] == api_key:
-            config["active_api"] = None if not config["api_keys"] else next(iter(config["api_keys"]))
-            if config["active_api"]:
-                config["api_keys"][config["active_api"]] = "active"
-        save_config(config)
-        print("✅ API Key removed successfully!")
-    else:
-        print("⚠️ API Key not found.")
+        if api_key in config["api_keys"]:
+            del config["api_keys"][api_key]
+            if config["active_api"] == api_key:
+                config["active_api"] = None if not config["api_keys"] else next(iter(config["api_keys"]))
+                if config["active_api"]:
+                    config["api_keys"][config["active_api"]] = "active"
+            save_config(config)
+            print("✅ API Key removed successfully!")
+            return
+        else:
+            print("⚠️ API Key not found. Please enter a valid key.")
 
 def set_active_api_key(config):
     """Set an API Key as active."""
@@ -138,17 +147,23 @@ def set_active_api_key(config):
         return
 
     list_api_keys(config)
-    api_key = input("\nEnter API Key to set as active: ").strip()
+    while True:
+        api_key = input("\nEnter API Key to set as active (or type 'cancel' to go back): ").strip()
+        if api_key.lower() == "cancel":
+            print("❌ Operation canceled. Returning to the previous menu.")
+            return
 
-    if api_key in config["api_keys"]:
-        for key in config["api_keys"]:
-            config["api_keys"][key] = "inactive"
-        config["api_keys"][api_key] = "active"
-        config["active_api"] = api_key
-        save_config(config)
-        print("✅ API Key set as active!")
-    else:
-        print("⚠️ API Key not found.")
+        if api_key in config["api_keys"]:
+            for key in config["api_keys"]:
+                config["api_keys"][key] = "inactive"
+            config["api_keys"][api_key] = "active"
+            config["active_api"] = api_key
+            save_config(config)
+            print("✅ API Key set as active!")
+            return
+        else:
+            print("⚠️ API Key not found. Please enter a valid key.")
+
 
 def config_menu(config):
     """Submenu for managing API Keys."""
