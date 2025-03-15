@@ -235,6 +235,65 @@ def list_vaults():
     except requests.exceptions.RequestException as e:
         print(f"❌ Error fetching vault data: {e}")
 
+def add_vault():
+    """Prompt the user to create a new vault with optional fields."""
+    
+    api_key = get_active_api_key()
+    if not api_key:
+        print("⚠️ No active API key is set.")
+        return
+
+    headers = {
+        "Api-Key": api_key,
+        "Content-Type": "application/json"
+    }
+
+    # Getting initial information from the user
+    name = input("🏷️ Enter Vault Name (Required): ").strip()
+    while not name:
+        print("❌ Name cannot be empty!")
+        name = input("🏷️ Enter Vault Name (Required): ").strip()
+
+    description = input("ℹ️ Enter Description (Optional): ").strip()
+    
+    tags = input("🏷️ Enter Tags (comma separated, Optional): ").strip()
+    tags_list = [tag.strip() for tag in tags.split(",")] if tags else []
+
+    encrypted = input("🔒 Do you want to encrypt the vault? (yes/no, Default: no): ").strip().lower()
+    encrypted = True if encrypted == "yes" else False
+
+    # If the encrypted vaults requires additional keys
+    keys = []
+    if encrypted:
+        add_keys = input("🔑 Do you want to add encryption keys? (yes/no, Default: no): ").strip().lower()
+        if add_keys == "yes":
+            while True:
+                key = input("🔐 Enter encryption key (or press Enter to skip): ").strip()
+                if not key:
+                    break
+                keys.append({"key": key})
+    
+    # Creating JSON data for sending to an API
+    vault_data = {
+        "name": name,
+        "description": description if description else None,
+        "tags": tags_list,
+        "encrypted": encrypted,
+        "keys": keys
+    }
+
+    # Removing None fields from JSON
+    vault_data = {k: v for k, v in vault_data.items() if v}
+
+    # Sending a Vault creation request
+    try:
+        response = requests.post(VAULTS_API_URL, headers=headers, json=vault_data)
+        response.raise_for_status()
+        data = response.json()
+        print(f"✅ Vault created successfully! 🆔 ID: {data.get('id')}")
+    except requests.RequestException as e:
+        print(f"❌ Failed to create vault: {e}")
+
 
 def vaults_menu(config):
     """Submenu for managing Vaults."""
@@ -253,6 +312,8 @@ def vaults_menu(config):
             print("  back      - Return to main menu\n")
         elif command == "list":
             list_vaults()  # Call the function to list vaults
+        elif command == "add":
+            add_vault()  # Call the function to add vaults
         elif command == "back":
             break
         else:
