@@ -6,6 +6,7 @@ import time
 # Constants
 CONFIG_FILE = "tuskytux_config.json"  # Path to store API Key
 TUSKY_API_URL = "https://api.tusky.io/api-keys"  # Tusky API endpoint for key validation
+VAULTS_API_URL = "https://api.tusky.io/vaults"  # Replace with actual endpoint
 LOGO_PATH = "assets/logo_ascii.txt"
 
 def ensure_config_file():
@@ -62,10 +63,7 @@ def show_intro():
     print("TuskyTux is a Linux-based open-source tool that allows you to mount your "
           "Tusky decentralized storage as a drive on your system.")
     print("\n🔗 Don't have an API Key yet? Register here: https://app.tusky.io/account/api-keys\n")
-    print("Features & Commands Overview:")
-    print("  - `config`: Manage API Key and settings.")
-    print("  - `close`: Exit the program.\n")
-    print("💡 Type 'help' to see available commands!\n")
+    print("❤ Dedicated to the open source community with love: https://meacodes.com\n")
 
 def show_loading(message="Validating API Key..."):
     """Display a loading animation while connecting to Tusky API."""
@@ -193,6 +191,73 @@ def config_menu(config):
         else:
             print("⚠️ Invalid command. Type 'config help' for options.")
 
+def get_active_api_key():
+    """Retrieve the active API key from the configuration file."""
+    try:
+        with open(CONFIG_FILE, "r") as f:
+            config = json.load(f)
+        return config.get("active_api")  # Return the active API key
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None  # Return None if the config file does not exist or is invalid
+
+
+def list_vaults():
+    """Fetch and display the list of vaults using the active API key."""
+    api_key = get_active_api_key()
+    if not api_key:
+        print("⚠️ No active API key is set.")
+        return
+
+    headers = {"api-key": api_key}  # API key is required for authentication
+    try:
+        response = requests.get(VAULTS_API_URL, headers=headers)  # Send GET request
+        response.raise_for_status()  # Raise an error for HTTP issues
+        data = response.json()  # Parse JSON response
+
+        vaults = data.get("items", [])  # Extract the list of vaults
+        if not vaults:
+            print("🔹 No vaults found.")
+            return
+
+        print("\n🔐 Vaults List:")
+        for vault in vaults:
+            vault_id = vault.get("id", "N/A")  # Get vault ID
+            name = vault.get("name", "Unknown")  # Get vault name
+            description = vault.get("description", "No Description")  # Get vault description
+            status = vault.get("status", "Unknown")  # Get vault status
+            encrypted = "🔒 Encrypted" if vault.get("encrypted") else "🔓 Unencrypted"  # Check encryption status
+
+            print(f"  📁 {name} ({status})")
+            print(f"     🆔 ID: {vault_id}")
+            print(f"     ℹ️  {description}")
+            print(f"     {encrypted}\n")
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Error fetching vault data: {e}")
+
+
+def vaults_menu(config):
+    """Submenu for managing Vaults."""
+    print("\n🔐 Vault Management")
+    print("Type 'vaults help' for available options.\n")
+
+    while True:
+        command = input("🔒 Vault Command: ").strip().lower()
+
+        if command == "vaults help":
+            print("\nVaults commands:")
+            print("  list      - Show vaults list")
+            print("  add       - Add a new Vault")
+            print("  remove    - Remove a vault")
+            print("  active    - Set a vault as active")
+            print("  back      - Return to main menu\n")
+        elif command == "list":
+            list_vaults()  # Call the function to list vaults
+        elif command == "back":
+            break
+        else:
+            print("⚠️ Invalid command. Type 'vaults help' for options.")
+
 def command_loop(config):
     """Keep the program running and accept user commands."""
     print("\n✅ TuskyTux is ready! Type 'help' to see available commands.\n")
@@ -203,9 +268,12 @@ def command_loop(config):
         if command == "help":
             print("\nAvailable commands:")
             print("  config    - Manage API Key and settings")
+            print("  vaults    - Manage Vaults and settings")
             print("  close     - Exit the program\n")
         elif command == "config":
             config_menu(config)
+        elif command == "vaults":
+            vaults_menu(config)
         elif command == "close":
             print("👋 Exiting TuskyTux. Goodbye!")
             break
