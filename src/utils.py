@@ -294,6 +294,52 @@ def add_vault():
     except requests.RequestException as e:
         print(f"❌ Failed to create vault: {e}")
 
+def remove_vault(config):
+    """Remove a vault by ID."""
+    print("\n❌ Remove a Vault")
+
+    # Get the vault ID from the user
+    vault_id = input("🆔 Enter Vault ID to delete: ").strip()
+    
+    if not vault_id:
+        print("⚠️ Vault ID cannot be empty.")
+        return
+
+    # Confirm the deletion
+    confirm = input(f"⚠️ Are you sure you want to permanently delete Vault {vault_id}? (yes/no): ").strip().lower()
+    if confirm != "yes":
+        print("🚫 Deletion canceled.")
+        return
+
+    # Retrieve the active API key from config
+    api_key = get_active_api_key()
+    if not api_key:
+        print("⚠️ No active API key is set.")
+        return
+
+    headers = {
+        "Api-Key": api_key,
+        "Content-Type": "application/json"
+    }
+
+    vault_url = f"{VAULTS_API_URL}/{vault_id}"
+
+    try:
+        # Send the DELETE request
+        response = requests.delete(vault_url, headers=headers)
+        
+        # Handle API response codes
+        if response.status_code == 204:
+            print(f"✅ Vault {vault_id} deleted successfully.")
+        elif response.status_code == 400:
+            print(f"⚠️ Cannot delete Vault {vault_id}: It may not be empty.")
+        elif response.status_code == 404:
+            print(f"⚠️ Vault {vault_id} not found.")
+        else:
+            print(f"❌ Error: {response.status_code} - {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Request failed: {e}")
+
 
 def vaults_menu(config):
     """Submenu for managing Vaults."""
@@ -314,6 +360,8 @@ def vaults_menu(config):
             list_vaults()  # Call the function to list vaults
         elif command == "add":
             add_vault()  # Call the function to add vaults
+        elif command == "remove":
+            remove_vault(config)  # Call the function to remove a vault
         elif command == "back":
             break
         else:
