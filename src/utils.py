@@ -340,6 +340,62 @@ def remove_vault(config):
     except requests.exceptions.RequestException as e:
         print(f"❌ Request failed: {e}")
 
+def mount_vault(config):
+    """Prompt user to mount a vault as a virtual drive."""
+    print("\n📂 Mount a Vault")
+
+    while True:
+        # Get the vault ID from the user
+        vault_id = input("🆔 Enter Vault ID to mount (or type 'cancel' to go back): ").strip()
+        
+        if vault_id.lower() == "cancel":
+            print("🚫 Operation canceled. Returning to Vaults menu.")
+            return
+        
+        if not vault_id:
+            print("⚠️ Vault ID cannot be empty. Try again.")
+            continue
+
+        break  # Exit loop if a valid Vault ID is provided
+
+    # Retrieve the active API key
+    api_key = get_active_api_key()
+    if not api_key:
+        print("⚠️ No active API key is set.")
+        return
+
+    # Fetch the list of user's vaults
+    headers = {"Api-Key": api_key}
+    try:
+        response = requests.get(VAULTS_API_URL, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+
+        vaults = data.get("items", [])
+        vault_found = None
+
+        for vault in vaults:
+            if vault.get("id") == vault_id:
+                vault_found = vault
+                break
+
+        if not vault_found:
+            print(f"❌ Vault with ID {vault_id} not found.")
+            return
+        
+        # Check if the vault is already mounted
+        mount_path = f"/mnt/tusky/{vault_id}"
+        if os.path.ismount(mount_path):
+            print(f"✅ Vault {vault_id} is already mounted at: {mount_path}")
+            return
+
+        # If not mounted, proceed to mounting process
+        print(f"⏳ Preparing to mount Vault {vault_id}...")
+        # The actual mounting logic will be added in the next steps.
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Error fetching vault data: {e}")
+
 
 def vaults_menu(config):
     """Submenu for managing Vaults."""
@@ -354,7 +410,7 @@ def vaults_menu(config):
             print("  list      - Show vaults list")
             print("  add       - Add a new Vault")
             print("  remove    - Remove a vault")
-            print("  active    - Set a vault as active")
+            print("  mount     - Mount a vault as a virtual drive")
             print("  back      - Return to main menu\n")
         elif command == "list":
             list_vaults()  # Call the function to list vaults
@@ -362,6 +418,8 @@ def vaults_menu(config):
             add_vault()  # Call the function to add vaults
         elif command == "remove":
             remove_vault(config)  # Call the function to remove a vault
+        elif command == "mount":
+            mount_vault(config)  # Call the function to mount a vault
         elif command == "back":
             break
         else:
